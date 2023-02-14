@@ -1,0 +1,9 @@
+redis:
+  host: localhost:8080
+  password: 123
+db:
+  password: 123
+  username: unflat
+  host: localhost
+  port: 5432
+  name: auth-db
