@@ -1,6 +1,6 @@
 package inputs
 
-import "GGSAuth/app/internal/transport/grpc"
+import "github.com/amperov/basic-auth-service/app/internal/transport/grpc"
 
 type SignRequest struct {
 	Email    string

@@ -3,12 +3,13 @@ package transport
 import (
 	"context"
 	"github.com/amperov/basic-auth-service/app/internal/transport/grpc"
+	"github.com/amperov/basic-auth-service/app/internal/transport/inputs"
 )
 
 type AuthService interface {
-	SignUp(ctx context.Context, email, password string) (int, string, string, error) //UserID, AccessCode, Status, Error
-	SignIn(ctx context.Context, email, password string) (int, string, string, error)
-	Identify(ctx context.Context, AccessCode string) (int, string, error)
+	SignUp(ctx context.Context, email, password string) (int, string, string, string, error) //UserID, AccessCode, Status, Error
+	SignIn(ctx context.Context, email, password string) (int, string, string, string, error)
+	Identify(ctx context.Context, AccessToken string, RefreshToken string) (int, string, string, error)
 }
 type GRPCServer struct {
 	AuthService AuthService
@@ -28,12 +29,12 @@ func (s *GRPCServer) SignUp(ctx context.Context, request *grpc.SignUpRequest) (*
 	var Request inputs.SignRequest
 	Request.UpFromGRPC(request)
 
-	UserID, AccessCode, Status, err := s.AuthService.SignUp(ctx, Request.Email, Request.Password)
+	UserID, AccessToken, RefreshToken, Status, err := s.AuthService.SignUp(ctx, Request.Email, Request.Password)
 	if err != nil {
 		return nil, err
 	}
 
-	return &grpc.SignResponse{UserID: int64(UserID), AccessCode: AccessCode, Status: Status}, nil
+	return &grpc.SignResponse{UserID: int64(UserID), AccessToken: AccessToken, RefreshToken: RefreshToken, Status: Status}, nil
 }
 
 func (s *GRPCServer) SignIn(ctx context.Context, request *grpc.SignInRequest) (*grpc.SignResponse, error) {
@@ -44,15 +45,16 @@ func (s *GRPCServer) SignIn(ctx context.Context, request *grpc.SignInRequest) (*
 }
 
 func (s *GRPCServer) Identity(ctx context.Context, request *grpc.IdentityRequest) (*grpc.IdentityResponse, error) {
-	UserID, AccessCode, err := s.AuthService.Identify(ctx, request.GetAccessCode())
+	UserID, AccessToken, RefreshToken, err := s.AuthService.Identify(ctx, request.GetAccessToken(), request.GetRefreshToken())
 	if err != nil {
 		return nil, err
 	}
 
 	return &grpc.IdentityResponse{
-		UserID:     int64(UserID),
-		Status:     err.Error(),
-		AccessCode: AccessCode,
+		UserID:       int64(UserID),
+		Status:       err.Error(),
+		AccessToken:  AccessToken,
+		RefreshToken: RefreshToken,
 	}, nil
 }
 

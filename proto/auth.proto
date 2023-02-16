@@ -14,13 +14,15 @@ service Authorization{
 }
 
 message IdentityRequest{
-  string AccessCode = 1;
+  string AccessToken = 1;
+  string RefreshToken =2;
 }
 
 message IdentityResponse{
   int64 UserID = 1;
   string Status = 2;
-  string AccessCode = 3;
+  string AccessToken = 3;
+  string RefreshToken = 4;
 }
 
 
@@ -35,7 +37,8 @@ message SignUpRequest{
 }
 
 message SignResponse{
-  string AccessCode = 1;
+  string AccessToken = 1;
+  string RefreshToken = 4;
   string Status = 2;
   int64 UserID = 3;
 }

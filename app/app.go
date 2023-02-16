@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"github.com/amperov/basic-auth-service/app/internal"
-	"github.com/amperov/basic-auth-service/app/internal/redis"
 	"github.com/amperov/basic-auth-service/app/internal/service"
 	"github.com/amperov/basic-auth-service/app/internal/storage"
 	"github.com/amperov/basic-auth-service/app/internal/transport"
@@ -30,7 +29,7 @@ func main() {
 		return
 	}
 
-	listen, err := net.Listen("tcp", ":8080")
+	listen, err := net.Listen("tcp", ":8082")
 	if err != nil {
 		return
 	}
@@ -41,13 +40,10 @@ func main() {
 	}
 
 	TokenManager := tools.NewTokenManager()
-	hasher := internal.NewHasher()
 
 	AuthStorage := storage.NewAuthStorage(PGClient)
 
-	RedisClient := redis.GetRedisClient()
-
-	AuthService := service.NewAuthService(AuthStorage, RedisClient, TokenManager, hasher)
+	AuthService := service.NewAuthService(AuthStorage, TokenManager, internal.NewHasher())
 
 	AuthServer := transport.NewGRPCServer(AuthService)
 	GRPCServer := grpc2.NewServer()
